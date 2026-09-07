@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --lms-primary: #4f46e5;
+    --lms-primary-strong: #4338ca;
+    --lms-accent: #f59e0b;
+    --lms-surface: #f8fafc;
+    --lms-surface-strong: #eef2ff;
+    --lms-dark: #0f172a;
+    --lms-card: rgba(255, 255, 255, 0.8);
+    --lms-border: rgba(148, 163, 184, 0.25);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Figtree', 'Segoe UI', sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.18), transparent 25%),
+        linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f8fafc 100%);
+    color: var(--lms-dark);
+}
+
+@layer components {
+    .lms-auth-shell {
+        @apply min-h-screen bg-slate-950;
+        background-image:
+            radial-gradient(circle at top left, rgba(99, 102, 241, 0.32), transparent 25%),
+            radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.2), transparent 25%),
+            linear-gradient(135deg, #020817 0%, #111827 35%, #0f172a 100%);
+    }
+
+    .lms-auth-card {
+        @apply overflow-hidden rounded-[30px] border border-white/10 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.35)] backdrop-blur-xl;
+    }
+
+    .lms-illustration {
+        background:
+            linear-gradient(135deg, rgba(79, 70, 229, 0.94), rgba(139, 92, 246, 0.82)),
+            linear-gradient(180deg, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.45));
+    }
+
+    .lms-input {
+        @apply mt-2 block w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 shadow-sm transition duration-200 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10;
+    }
+
+    .lms-button {
+        @apply inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition duration-200 hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20;
+    }
+
+    .lms-muted-link {
+        @apply text-sm font-medium text-slate-500 transition hover:text-indigo-600;
+    }
+}
+
+@media (max-width: 640px) {
+    .lms-auth-card {
+        border-radius: 24px;
+    }
+}
