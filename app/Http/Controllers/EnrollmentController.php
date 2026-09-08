@@ -7,6 +7,8 @@ use App\Models\Enrollment;
 use App\Models\Lecture;
 use App\Models\LectureProgress;
 use App\Models\QuizAttempt;
+use App\Models\Certificate;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
 class EnrollmentController extends Controller
@@ -138,201 +140,201 @@ class EnrollmentController extends Controller
             'progressPercentage'
         ));
     }
-  
-public function completeLecture($courseId, $lectureId)
-{
-    $userId = Auth::id();
+
+    public function completeLecture($courseId, $lectureId)
+    {
+        $userId = Auth::id();
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 1. Verify Student Enrollment
     |--------------------------------------------------------------------------
     */
 
-    $enrollment = Enrollment::where('user_id', $userId)
-        ->where('course_id', $courseId)
-        ->whereIn('status', ['active', 'completed'])
-        ->firstOrFail();
+        $enrollment = Enrollment::where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->whereIn('status', ['active', 'completed'])
+            ->firstOrFail();
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 2. Get Course with Active Lectures and Quizzes
     |--------------------------------------------------------------------------
     */
 
-    $course = Course::with([
+        $course = Course::with([
 
-        'lectures' => function ($query) {
+            'lectures' => function ($query) {
 
-            $query->where('status', 'active')
-                ->orderBy('lecture_order');
-        },
+                $query->where('status', 'active')
+                    ->orderBy('lecture_order');
+            },
 
-        'quizzes' => function ($query) {
+            'quizzes' => function ($query) {
 
-            $query->where('status', 'active');
-        }
+                $query->where('status', 'active');
+            }
 
-    ])->findOrFail($courseId);
+        ])->findOrFail($courseId);
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 3. Verify Lecture Belongs to Course
     |--------------------------------------------------------------------------
     */
 
-    $lecture = $course->lectures
-        ->where('id', $lectureId)
-        ->first();
+        $lecture = $course->lectures
+            ->where('id', $lectureId)
+            ->first();
 
 
-    if (!$lecture) {
+        if (!$lecture) {
 
-        abort(
-            404,
-            'Lecture not found in this course.'
-        );
-    }
+            abort(
+                404,
+                'Lecture not found in this course.'
+            );
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 4. Mark Lecture as Completed
     |--------------------------------------------------------------------------
     */
 
-    LectureProgress::updateOrCreate(
+        LectureProgress::updateOrCreate(
 
-        [
-            'user_id' => $userId,
-            'course_id' => $courseId,
-            'lecture_id' => $lectureId,
-        ],
+            [
+                'user_id' => $userId,
+                'course_id' => $courseId,
+                'lecture_id' => $lectureId,
+            ],
 
-        [
-            'is_completed' => true,
-            'completed_at' => now(),
-        ]
+            [
+                'is_completed' => true,
+                'completed_at' => now(),
+            ]
 
-    );
+        );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 5. Count Total Active Lectures
     |--------------------------------------------------------------------------
     */
 
-    $totalLectures = $course->lectures->count();
+        $totalLectures = $course->lectures->count();
 
-    $lectureIds = $course->lectures->pluck('id');
+        $lectureIds = $course->lectures->pluck('id');
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 6. Count Completed Active Lectures
     |--------------------------------------------------------------------------
     */
 
-    $completedLectures = LectureProgress::where(
-        'user_id',
-        $userId
-    )
-        ->where(
-            'course_id',
-            $courseId
+        $completedLectures = LectureProgress::where(
+            'user_id',
+            $userId
         )
-        ->where(
-            'is_completed',
-            true
-        )
-        ->whereIn(
-            'lecture_id',
-            $lectureIds
-        )
-        ->count();
+            ->where(
+                'course_id',
+                $courseId
+            )
+            ->where(
+                'is_completed',
+                true
+            )
+            ->whereIn(
+                'lecture_id',
+                $lectureIds
+            )
+            ->count();
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 7. Check Course Content Finalization
     |--------------------------------------------------------------------------
     */
 
-    $contentFinalized =
-        (bool) $course->content_finalized;
+        $contentFinalized =
+            (bool) $course->content_finalized;
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 8. Check All Active Lectures Completed
     |--------------------------------------------------------------------------
     */
 
-    $allLecturesCompleted =
-        $totalLectures > 0 &&
-        $completedLectures >= $totalLectures;
+        $allLecturesCompleted =
+            $totalLectures > 0 &&
+            $completedLectures >= $totalLectures;
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 9. Get Active Quizzes
     |--------------------------------------------------------------------------
     */
 
-    $activeQuizzes = $course->quizzes;
+        $activeQuizzes = $course->quizzes;
 
-    $quizRequired =
-        $activeQuizzes->count() > 0;
+        $quizRequired =
+            $activeQuizzes->count() > 0;
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 10. Check All Required Quizzes Are Passed
     |--------------------------------------------------------------------------
     */
 
-    $allQuizzesPassed = true;
+        $allQuizzesPassed = true;
 
 
-    if ($quizRequired) {
+        if ($quizRequired) {
 
-        foreach ($activeQuizzes as $quiz) {
+            foreach ($activeQuizzes as $quiz) {
 
-            $quizPassed = QuizAttempt::where(
-                'quiz_id',
-                $quiz->id
-            )
-                ->where(
-                    'user_id',
-                    $userId
+                $quizPassed = QuizAttempt::where(
+                    'quiz_id',
+                    $quiz->id
                 )
-                ->where(
-                    'result',
-                    'pass'
-                )
-                ->exists();
+                    ->where(
+                        'user_id',
+                        $userId
+                    )
+                    ->where(
+                        'result',
+                        'pass'
+                    )
+                    ->exists();
 
 
-            /*
+                /*
             | If even one active quiz has not been passed,
             | course completion is not allowed.
             */
 
-            if (!$quizPassed) {
+                if (!$quizPassed) {
 
-                $allQuizzesPassed = false;
+                    $allQuizzesPassed = false;
 
-                break;
+                    break;
+                }
             }
         }
-    }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 11. Check Final Course Completion Requirements
     |--------------------------------------------------------------------------
@@ -345,18 +347,18 @@ public function completeLecture($courseId, $lectureId)
     |
     */
 
-    $canCompleteCourse =
-        $contentFinalized
-        &&
-        $allLecturesCompleted
-        &&
-        (
-            !$quizRequired ||
-            $allQuizzesPassed
-        );
+        $canCompleteCourse =
+            $contentFinalized
+            &&
+            $allLecturesCompleted
+            &&
+            (
+                !$quizRequired ||
+                $allQuizzesPassed
+            );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 12. Update Course Completion Status
     |--------------------------------------------------------------------------
@@ -366,104 +368,115 @@ public function completeLecture($courseId, $lectureId)
     |
     */
 
-    if (
-        $canCompleteCourse &&
-        $enrollment->status !== 'completed'
-    ) {
+        if (
+            $canCompleteCourse &&
+            $enrollment->status !== 'completed'
+        ) {
 
-        $enrollment->update([
+            $enrollment->update([
 
-            'status' => 'completed',
+                'status' => 'completed',
 
-            'completed_at' => now(),
+                'completed_at' => now(),
 
-        ]);
+            ]);
 
-    }
+            Certificate::firstOrCreate(
+
+                [
+                    'user_id' => $userId,
+                    'course_id' => $courseId,
+                ],
+
+                [
+                    'certificate_number' =>
+                    'CERT-' .
+                        strtoupper(Str::random(10)),
+
+                    'issued_at' => now(),
+                ]
+            );
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 13. Get Fresh Enrollment Status
     |--------------------------------------------------------------------------
     */
 
-    $enrollment = $enrollment->fresh();
+        $enrollment = $enrollment->fresh();
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 14. Return JSON for Automatic Video Completion
     |--------------------------------------------------------------------------
     */
 
-    if (request()->expectsJson()) {
+        if (request()->expectsJson()) {
 
-        return response()->json([
+            return response()->json([
 
-            'success' => true,
+                'success' => true,
 
-            'course_completed' =>
+                'course_completed' =>
                 $enrollment->status === 'completed',
 
-            'content_finalized' =>
+                'content_finalized' =>
                 $contentFinalized,
 
-            'all_lectures_completed' =>
+                'all_lectures_completed' =>
                 $allLecturesCompleted,
 
-            'quiz_required' =>
+                'quiz_required' =>
                 $quizRequired,
 
-            'all_quizzes_passed' =>
+                'all_quizzes_passed' =>
                 $allQuizzesPassed,
 
-            'completed_lectures' =>
+                'completed_lectures' =>
                 $completedLectures,
 
-            'total_lectures' =>
+                'total_lectures' =>
                 $totalLectures,
 
-        ]);
-    }
+            ]);
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 15. Normal Success Message
     |--------------------------------------------------------------------------
     */
 
-    if ($enrollment->status === 'completed') {
+        if ($enrollment->status === 'completed') {
 
-        $message =
-            'Congratulations! You have completed this course.';
+            $message =
+                'Congratulations! You have completed this course.';
+        } elseif (!$contentFinalized) {
 
-    } elseif (!$contentFinalized) {
+            $message =
+                'Lecture marked as completed successfully. Course content is still being updated by the instructor.';
+        } elseif (
+            $allLecturesCompleted &&
+            $quizRequired &&
+            !$allQuizzesPassed
+        ) {
 
-        $message =
-            'Lecture marked as completed successfully. Course content is still being updated by the instructor.';
+            $message =
+                'All lectures are completed. Please pass all required quizzes to complete this course.';
+        } else {
 
-    } elseif (
-        $allLecturesCompleted &&
-        $quizRequired &&
-        !$allQuizzesPassed
-    ) {
+            $message =
+                'Lecture marked as completed successfully.';
+        }
 
-        $message =
-            'All lectures are completed. Please pass all required quizzes to complete this course.';
 
-    } else {
-
-        $message =
-            'Lecture marked as completed successfully.';
+        return back()->with(
+            'success',
+            $message
+        );
     }
-
-
-    return back()->with(
-        'success',
-        $message
-    );
-}
-
 }

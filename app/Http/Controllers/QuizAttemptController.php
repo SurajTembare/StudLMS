@@ -7,6 +7,8 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\Enrollment;
 use App\Models\LectureProgress;
+use App\Models\Certificate;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -353,6 +355,22 @@ class QuizAttemptController extends Controller
                 'completed_at' => now(),
 
             ]);
+
+            Certificate::firstOrCreate(
+
+                [
+                    'user_id' => $userId,
+                    'course_id' => $courseId,
+                ],
+
+                [
+                    'certificate_number' =>
+                    'CERT-' .
+                        strtoupper(Str::random(10)),
+
+                    'issued_at' => now(),
+                ]
+            );
 
 
             $courseCompleted = true;

@@ -10,8 +10,11 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizQuestionController;
 use App\Http\Controllers\QuizAttemptController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\EnrollmentController;
+
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +24,12 @@ Route::get('/', function () {
 Route::get('/', [FrontendController::class, 'index'])->name('home');
 Route::get('/courses', [FrontendController::class, 'courses'])->name('courses');
 Route::get('/course/{id}', [FrontendController::class, 'courseDetails'])->name('course.details');
+
+//verify certificate
+Route::get('/verify-certificate', [CertificateController::class, 'verifyForm'])->name('certificate.verify.form');
+ Route::post('/verify-certificate', [CertificateController::class, 'verify'])->name('certificate.verify');   
+   
+
 
 
 Route::middleware('auth')->group(function () {
@@ -43,6 +52,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/course/{courseId}/quiz/{quizId}/result/{attemptId}', [QuizAttemptController::class, 'result'])->name('student.quiz.result');
     Route::get('/course/{courseId}/quiz/{quizId}/history', [QuizAttemptController::class, 'history'])->name('student.quiz.history');
+
+    // Certificate Routes
+    Route::get('/my-certificates', [CertificateController::class, 'index'])->name('student.certificates.index');
+    Route::get('/certificate/{certificateId}', [CertificateController::class, 'show'])->name('student.certificate.show');
+    Route::get('/certificate/{certificateId}/download', [CertificateController::class, 'download'])->name('student.certificate.download');
+
 });
 
 

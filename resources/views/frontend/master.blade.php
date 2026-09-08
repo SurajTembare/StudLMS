@@ -81,7 +81,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 24%);
+            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 24%);
         }
 
         .hero-content {
@@ -94,8 +94,8 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.6rem 1rem;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 999px;
             color: #f8fafc;
             font-size: 0.82rem;
@@ -104,8 +104,8 @@
 
         .float-card {
             position: relative;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 24px;
             backdrop-filter: blur(10px);
             box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
@@ -155,7 +155,7 @@
         }
 
         .lecture-item {
-            background: rgba(255,255,255,0.8);
+            background: rgba(255, 255, 255, 0.8);
             padding: 1rem 1.1rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -167,11 +167,11 @@
 
         .premium-footer {
             background: linear-gradient(180deg, #0f172a 0%, #020817 100%);
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .premium-footer a {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
         }
 
@@ -226,7 +226,9 @@
                         </a>
                     </li>
 
-                   
+
+
+
 
                     @guest
                     <li class="nav-item ms-lg-2">
@@ -246,14 +248,25 @@
 
                     @auth
 
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link"
                             href="{{ route('my.learning') }}">
                             <i class="fa-solid fa-book-open me-1"></i>
                             My Learning
                         </a>
                     </li>
-                    
+
+                    <li>
+                        <a href="{{ route('student.certificates.index') }}">
+
+                            <i class="fa-solid fa-certificate me-2"></i>
+
+                            My Certificates
+
+                        </a>
+                    </li>
+
+
                     <li class="nav-item ms-lg-3">
                         <span class="text-white me-2">
                             Hi, {{ Auth::user()->name }}
@@ -297,6 +310,11 @@
                     <p class="text-white-50 mb-0">
                         Learn faster, build real-world skills, and turn knowledge into momentum with a premium learning experience.
                     </p>
+
+                    <a href="{{ route('certificate.verify.form') }}">
+                        <i class="fa-solid fa-shield-check me-1"></i>
+                        Verify Certificate
+                    </a>
                 </div>
 
                 <div class="col-md-4 col-lg-2">
