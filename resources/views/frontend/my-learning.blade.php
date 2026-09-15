@@ -136,6 +136,7 @@
                                         Course Completed 🎓
 
                                     </span>
+                                    
 
 
                                 @elseif(!$contentFinalized)

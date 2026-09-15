@@ -45,14 +45,16 @@ class EnrollmentController extends Controller
     // Show student's enrolled courses
     public function myLearning()
     {
-        // Get all active enrollments of the logged-in student
+        $userId = Auth::id();
+
+        // Get all active and completed enrollments
         $enrollments = Enrollment::with([
             'course.lectures' => function ($query) {
                 $query->where('status', 'active')
                     ->orderBy('lecture_order');
             }
         ])
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->whereIn('status', ['active', 'completed'])
             ->latest()
             ->get();
@@ -66,26 +68,76 @@ class EnrollmentController extends Controller
                 continue;
             }
 
+            /*
+        |--------------------------------------------------------------------------
+        | 1. Get Total Active Lectures
+        |--------------------------------------------------------------------------
+        */
+
             $totalLectures = $course->lectures->count();
 
-            $completedCount = LectureProgress::where('user_id', Auth::id())
+
+            /*
+        |--------------------------------------------------------------------------
+        | 2. Get IDs of Active Lectures Only
+        |--------------------------------------------------------------------------
+        */
+
+            $activeLectureIds = $course->lectures->pluck('id');
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | 3. Count Only Completed Active Lectures
+        |--------------------------------------------------------------------------
+        */
+
+            $completedCount = LectureProgress::where('user_id', $userId)
                 ->where('course_id', $course->id)
                 ->where('is_completed', true)
+                ->whereIn('lecture_id', $activeLectureIds)
                 ->count();
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | 4. Calculate Progress Percentage
+        |--------------------------------------------------------------------------
+        */
 
             $progressPercentage = $totalLectures > 0
                 ? round(($completedCount / $totalLectures) * 100)
                 : 0;
 
-            // Add temporary progress values to the enrollment object
+
+            /*
+        |--------------------------------------------------------------------------
+        | 5. Safety Limit
+        |--------------------------------------------------------------------------
+        */
+
+            $progressPercentage = min($progressPercentage, 100);
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | 6. Add Temporary Progress Values
+        |--------------------------------------------------------------------------
+        */
+
             $enrollment->totalLectures = $totalLectures;
+
             $enrollment->completedCount = $completedCount;
+
             $enrollment->progressPercentage = $progressPercentage;
         }
 
-        return view('frontend.my-learning', compact('enrollments'));
-    }
 
+        return view(
+            'frontend.my-learning',
+            compact('enrollments')
+        );
+    }
     // Learning page - only for enrolled students
     public function learn($courseId, $lectureId = null)
     {

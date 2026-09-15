@@ -1,4 +1,4 @@
-```blade
+
 @extends('admin.master')
 
 @section('title', 'Courses')

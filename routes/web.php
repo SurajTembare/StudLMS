@@ -92,7 +92,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/categories/delete/{id}', [CategoryController::class, 'destroy'])
         ->name('categories.destroy');
 
-    // Course Routes
+      // Course Routes
     Route::get('/courses', [CourseController::class, 'index'])
         ->name('courses.index');
 
