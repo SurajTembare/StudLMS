@@ -70,6 +70,28 @@ class EnrollmentController extends Controller
 
             /*
         |--------------------------------------------------------------------------
+        | Completed Course
+        |--------------------------------------------------------------------------
+        |
+        | Once a student officially completes a finalized course,
+        | the completion status is permanent.
+        |
+        */
+
+            if ($enrollment->status === 'completed') {
+
+                $enrollment->totalLectures = $course->lectures->count();
+
+                $enrollment->completedCount = $course->lectures->count();
+
+                $enrollment->progressPercentage = 100;
+
+                continue;
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
         | 1. Get Total Active Lectures
         |--------------------------------------------------------------------------
         */
@@ -92,11 +114,16 @@ class EnrollmentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            $completedCount = LectureProgress::where('user_id', $userId)
-                ->where('course_id', $course->id)
-                ->where('is_completed', true)
-                ->whereIn('lecture_id', $activeLectureIds)
-                ->count();
+            $completedCount = 0;
+
+            if ($activeLectureIds->isNotEmpty()) {
+
+                $completedCount = LectureProgress::where('user_id', $userId)
+                    ->where('course_id', $course->id)
+                    ->where('is_completed', true)
+                    ->whereIn('lecture_id', $activeLectureIds)
+                    ->count();
+            }
 
 
             /*
@@ -132,6 +159,12 @@ class EnrollmentController extends Controller
             $enrollment->progressPercentage = $progressPercentage;
         }
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | Return My Learning Page
+    |--------------------------------------------------------------------------
+    */
 
         return view(
             'frontend.my-learning',

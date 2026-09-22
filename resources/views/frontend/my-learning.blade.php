@@ -420,7 +420,7 @@
 
 
             <a
-                href="{{ route('courses.index') }}"
+                href="{{ route('courses') }}"
                 class="btn btn-primary">
 
                 <i class="fa-solid fa-book-open me-2"></i>
