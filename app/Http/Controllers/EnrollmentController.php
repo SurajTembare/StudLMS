@@ -47,8 +47,14 @@ class EnrollmentController extends Controller
     {
         $userId = Auth::id();
 
-        // Get all active and completed enrollments
+        /*
+    |--------------------------------------------------------------------------
+    | Get All Active and Completed Enrollments
+    |--------------------------------------------------------------------------
+    */
+
         $enrollments = Enrollment::with([
+            'course.category',
             'course.lectures' => function ($query) {
                 $query->where('status', 'active')
                     ->orderBy('lecture_order');
@@ -59,7 +65,30 @@ class EnrollmentController extends Controller
             ->latest()
             ->get();
 
-        // Add progress information to every enrolled course
+
+        /*
+    |--------------------------------------------------------------------------
+    | Dashboard Summary Counts
+    |--------------------------------------------------------------------------
+    */
+
+        $enrolledCoursesCount = $enrollments->count();
+
+        $completedCoursesCount = $enrollments
+            ->where('status', 'completed')
+            ->count();
+
+        $inProgressCoursesCount = $enrollments
+            ->where('status', 'active')
+            ->count();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Add Progress Information to Every Enrolled Course
+    |--------------------------------------------------------------------------
+    */
+
         foreach ($enrollments as $enrollment) {
 
             $course = $enrollment->course;
@@ -67,6 +96,7 @@ class EnrollmentController extends Controller
             if (!$course) {
                 continue;
             }
+
 
             /*
         |--------------------------------------------------------------------------
@@ -80,9 +110,11 @@ class EnrollmentController extends Controller
 
             if ($enrollment->status === 'completed') {
 
-                $enrollment->totalLectures = $course->lectures->count();
+                $enrollment->totalLectures =
+                    $course->lectures->count();
 
-                $enrollment->completedCount = $course->lectures->count();
+                $enrollment->completedCount =
+                    $course->lectures->count();
 
                 $enrollment->progressPercentage = 100;
 
@@ -96,7 +128,8 @@ class EnrollmentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            $totalLectures = $course->lectures->count();
+            $totalLectures =
+                $course->lectures->count();
 
 
             /*
@@ -105,7 +138,8 @@ class EnrollmentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            $activeLectureIds = $course->lectures->pluck('id');
+            $activeLectureIds =
+                $course->lectures->pluck('id');
 
 
             /*
@@ -133,7 +167,9 @@ class EnrollmentController extends Controller
         */
 
             $progressPercentage = $totalLectures > 0
-                ? round(($completedCount / $totalLectures) * 100)
+                ? round(
+                    ($completedCount / $totalLectures) * 100
+                )
                 : 0;
 
 
@@ -143,7 +179,8 @@ class EnrollmentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            $progressPercentage = min($progressPercentage, 100);
+            $progressPercentage =
+                min($progressPercentage, 100);
 
 
             /*
@@ -152,11 +189,14 @@ class EnrollmentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            $enrollment->totalLectures = $totalLectures;
+            $enrollment->totalLectures =
+                $totalLectures;
 
-            $enrollment->completedCount = $completedCount;
+            $enrollment->completedCount =
+                $completedCount;
 
-            $enrollment->progressPercentage = $progressPercentage;
+            $enrollment->progressPercentage =
+                $progressPercentage;
         }
 
 
@@ -168,7 +208,12 @@ class EnrollmentController extends Controller
 
         return view(
             'frontend.my-learning',
-            compact('enrollments')
+            compact(
+                'enrollments',
+                'enrolledCoursesCount',
+                'inProgressCoursesCount',
+                'completedCoursesCount'
+            )
         );
     }
     // Learning page - only for enrolled students

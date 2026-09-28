@@ -168,7 +168,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{route('admin.certificates.index')}}" class="nav-link">
                     <i class="fa-solid fa-certificate me-2"></i>
                     Certificates
                 </a>

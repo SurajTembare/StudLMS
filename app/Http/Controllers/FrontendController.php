@@ -67,22 +67,22 @@ class FrontendController extends Controller
             $courseQuery->where('title', 'like', '%' . $request->search . '%');
         }
 
-         /*
+        /*
     |--------------------------------------------------------------------------
     | Free / Paid Filter
     |--------------------------------------------------------------------------
     */
 
-    if ($request->filled('course_type')) {
+        if ($request->filled('course_type')) {
 
-        $courseQuery->where(
-            'course_type',
-            $request->course_type
-        );
-    }
+            $courseQuery->where(
+                'course_type',
+                $request->course_type
+            );
+        }
 
 
-    
+
 
 
         $courses = $courseQuery
@@ -100,7 +100,12 @@ class FrontendController extends Controller
     // Course Details using ID
     public function courseDetails($id)
     {
-        // Get active course with category and lectures
+        /*
+    |--------------------------------------------------------------------------
+    | Get Active Course
+    |--------------------------------------------------------------------------
+    */
+
         $course = Course::with([
             'category',
             'lectures' => function ($query) {
@@ -111,20 +116,63 @@ class FrontendController extends Controller
             ->where('status', 'active')
             ->findOrFail($id);
 
-        // Default: student is not enrolled
+
+        /*
+    |--------------------------------------------------------------------------
+    | Default Enrollment Values
+    |--------------------------------------------------------------------------
+    */
+
         $isEnrolled = false;
 
-        // Check enrollment only when user is logged in
+        $enrollmentStatus = null;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Check Student Enrollment
+    |--------------------------------------------------------------------------
+    */
+
         if (Auth::check()) {
-            $isEnrolled = Enrollment::where('user_id', Auth::id())
+
+            $enrollment = Enrollment::where('user_id', Auth::id())
                 ->where('course_id', $course->id)
-                ->where('status', 'active')
-                ->exists();
+                ->whereIn('status', ['active', 'completed'])
+                ->first();
+
+            if ($enrollment) {
+
+                $isEnrolled = true;
+
+                $enrollmentStatus = $enrollment->status;
+            }
         }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Total Active Lectures
+    |--------------------------------------------------------------------------
+    */
+
+        $totalLectures = $course->lectures->count();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Return Course Details Page
+    |--------------------------------------------------------------------------
+    */
 
         return view(
             'frontend.course-details',
-            compact('course', 'isEnrolled')
+            compact(
+                'course',
+                'isEnrolled',
+                'enrollmentStatus',
+                'totalLectures'
+            )
         );
     }
 }

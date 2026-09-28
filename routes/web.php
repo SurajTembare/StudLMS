@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\LectureController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\Admin\CertificateController as AdminCertificateController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FrontendController;
@@ -27,8 +28,8 @@ Route::get('/course/{id}', [FrontendController::class, 'courseDetails'])->name('
 
 //verify certificate
 Route::get('/verify-certificate', [CertificateController::class, 'verifyForm'])->name('certificate.verify.form');
- Route::post('/verify-certificate', [CertificateController::class, 'verify'])->name('certificate.verify');   
-   
+Route::post('/verify-certificate', [CertificateController::class, 'verify'])->name('certificate.verify');
+
 
 
 
@@ -57,7 +58,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-certificates', [CertificateController::class, 'index'])->name('student.certificates.index');
     Route::get('/certificate/{certificateId}', [CertificateController::class, 'show'])->name('student.certificate.show');
     Route::get('/certificate/{certificateId}/download', [CertificateController::class, 'download'])->name('student.certificate.download');
-
 });
 
 
@@ -69,6 +69,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Student Routes
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/{id}', [StudentController::class, 'show']) ->name('students.show');
+   
 
     // Enrollment Routes
     Route::get('/enrollments', [EnrollmentManagementController::class, 'index'])->name('enrollments.index');
@@ -92,7 +94,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/categories/delete/{id}', [CategoryController::class, 'destroy'])
         ->name('categories.destroy');
 
-      // Course Routes
+    // Course Routes
     Route::get('/courses', [CourseController::class, 'index'])
         ->name('courses.index');
 
@@ -145,7 +147,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Quiz Routes  
     Route::resource('quizzes', QuizController::class)->except(['show'])->names('quizzes');
 
+    //certificate Routes
+    
 
+    Route::get('/certificates', [AdminCertificateController::class, 'index'])
+        ->name('certificates.index');
+
+    Route::get('/certificates/{id}', [AdminCertificateController::class, 'show'])
+        ->name('certificates.show');
+
+    Route::get('/certificates/{id}/download', [AdminCertificateController::class, 'download'])
+        ->name('certificates.download');
+
+    Route::delete('/certificates/{id}', [AdminCertificateController::class, 'destroy'])
+        ->name('certificates.destroy');
 
     Route::prefix('quizzes/{quizId}/questions')
         ->group(function () {
