@@ -191,4 +191,242 @@
     </div>
 </div>
 
+
+{{-- Additional Dashboard Statistics --}}
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="card-body">
+                <p class="text-muted mb-1">Active Enrollments</p>
+                <h3 class="fw-bold text-success mb-0">
+                    {{ $stats['activeEnrollments'] }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="card-body">
+                <p class="text-muted mb-1">Completed Enrollments</p>
+                <h3 class="fw-bold text-primary mb-0">
+                    {{ $stats['completedEnrollments'] }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="card-body">
+                <p class="text-muted mb-1">Certificates Issued</p>
+                <h3 class="fw-bold text-warning mb-0">
+                    {{ $stats['certificates'] }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{{-- Recent Students --}}
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="fa-solid fa-users text-primary me-2"></i>
+                    Recent Students
+                </h5>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3">Student</th>
+                                <th>Email</th>
+                                <th>Registered</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse($recentStudents as $student)
+                                <tr>
+                                    <td class="px-3">
+                                        <div class="fw-semibold">
+                                            {{ $student->name }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <small>{{ $student->email }}</small>
+                                    </td>
+
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ $student->created_at?->format('d M Y') ?? '—' }}
+                                        </small>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3"
+                                        class="text-center text-muted py-4">
+                                        No students registered yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    {{-- Recent Enrollments --}}
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="fa-solid fa-user-check text-success me-2"></i>
+                    Recent Enrollments
+                </h5>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3">Student</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse($recentEnrollments as $enrollment)
+                                <tr>
+                                    <td class="px-3">
+                                        <div class="fw-semibold">
+                                            {{ $enrollment->user->name ?? 'Student Removed' }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <small>
+                                            {{ $enrollment->course->title ?? 'Course Removed' }}
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        @if($enrollment->status === 'completed')
+                                            <span class="badge bg-primary">
+                                                Completed
+                                            </span>
+                                        @elseif($enrollment->status === 'active')
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">
+                                                {{ ucfirst($enrollment->status) }}
+                                            </span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3"
+                                        class="text-center text-muted py-4">
+                                        No enrollments yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+{{-- Recent Certificates --}}
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0">
+            <i class="fa-solid fa-certificate text-warning me-2"></i>
+            Recently Issued Certificates
+        </h5>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3">Certificate Number</th>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Issued Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse($recentCertificates as $certificate)
+                        <tr>
+                            <td class="px-3">
+                                <span class="fw-semibold">
+                                    {{ $certificate->certificate_number }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ $certificate->user->name ?? 'Student Removed' }}
+                            </td>
+
+                            <td>
+                                {{ $certificate->course->title ?? 'Course Removed' }}
+                            </td>
+
+                            <td>
+                                {{ $certificate->issued_at
+                                    ? $certificate->issued_at->format('d M Y')
+                                    : '—' }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4"
+                                class="text-center text-muted py-4">
+                                No certificates issued yet.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
 @endsection

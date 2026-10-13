@@ -9,11 +9,13 @@ use App\Http\Controllers\Admin\LectureController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\CertificateController as AdminCertificateController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\CoursePaymentController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -58,7 +60,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-certificates', [CertificateController::class, 'index'])->name('student.certificates.index');
     Route::get('/certificate/{certificateId}', [CertificateController::class, 'show'])->name('student.certificate.show');
     Route::get('/certificate/{certificateId}/download', [CertificateController::class, 'download'])->name('student.certificate.download');
-});
+//payment Routes
+    Route::get('/courses/{courseId}/checkout', [CoursePaymentController::class, 'checkout'])->name('course.payment');
+    Route::post(  '/course-payment/verify', [CoursePaymentController::class, 'verify'])->name('course.payment.verify');
+    Route::post('/course-payment/cancel', [CoursePaymentController::class, 'cancel'])->name('course.payment.cancel');
+    Route::post('/course-payment/failed', [CoursePaymentController::class, 'failed'])    ->name('course.payment.failed');
+
+    
+    });
 
 
 
@@ -69,8 +78,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Student Routes
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
-    Route::get('/students/{id}', [StudentController::class, 'show']) ->name('students.show');
-   
+    Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
+
 
     // Enrollment Routes
     Route::get('/enrollments', [EnrollmentManagementController::class, 'index'])->name('enrollments.index');
@@ -148,7 +157,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('quizzes', QuizController::class)->except(['show'])->names('quizzes');
 
     //certificate Routes
-    
+
 
     Route::get('/certificates', [AdminCertificateController::class, 'index'])
         ->name('certificates.index');
@@ -161,6 +170,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::delete('/certificates/{id}', [AdminCertificateController::class, 'destroy'])
         ->name('certificates.destroy');
+   // Payment Routes
+
+    Route::get('/payments', [PaymentController::class, 'index'])
+        ->name('payments.index');
+
+    Route::get('/payments/{id}', [PaymentController::class, 'show'])
+        ->name('payments.show');
 
     Route::prefix('quizzes/{quizId}/questions')
         ->group(function () {
