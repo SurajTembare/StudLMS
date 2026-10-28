@@ -256,6 +256,14 @@
                         </a>
                     </li>
 
+                    <!-- Student Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('student.dashboard') }}">
+                            <i class="fa-solid fa-gauge-high me-1"></i>
+                            Dashboard
+                        </a>
+                    </li>
+
                     <li>
                         <a href="{{ route('student.certificates.index') }}">
 

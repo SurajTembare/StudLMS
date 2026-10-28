@@ -16,6 +16,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CoursePaymentController;
+use App\Http\Controllers\StudentDashboardController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -60,14 +61,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-certificates', [CertificateController::class, 'index'])->name('student.certificates.index');
     Route::get('/certificate/{certificateId}', [CertificateController::class, 'show'])->name('student.certificate.show');
     Route::get('/certificate/{certificateId}/download', [CertificateController::class, 'download'])->name('student.certificate.download');
-//payment Routes
+    //payment Routes
     Route::get('/courses/{courseId}/checkout', [CoursePaymentController::class, 'checkout'])->name('course.payment');
-    Route::post(  '/course-payment/verify', [CoursePaymentController::class, 'verify'])->name('course.payment.verify');
+    Route::post('/course-payment/verify', [CoursePaymentController::class, 'verify'])->name('course.payment.verify');
     Route::post('/course-payment/cancel', [CoursePaymentController::class, 'cancel'])->name('course.payment.cancel');
-    Route::post('/course-payment/failed', [CoursePaymentController::class, 'failed'])    ->name('course.payment.failed');
-
-    
-    });
+    Route::post('/course-payment/failed', [CoursePaymentController::class, 'failed'])->name('course.payment.failed');
+});
 
 
 
@@ -170,7 +169,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::delete('/certificates/{id}', [AdminCertificateController::class, 'destroy'])
         ->name('certificates.destroy');
-   // Payment Routes
+    // Payment Routes
 
     Route::get('/payments', [PaymentController::class, 'index'])
         ->name('payments.index');
@@ -203,6 +202,9 @@ Route::get('/dashboard', function () {
 
     return redirect('/');
 })->middleware('auth')->name('dashboard');
+
+Route::get('/student-dashboard', [ StudentDashboardController::class, 'index'
+   ])->middleware('auth')->name('student.dashboard');
 
 
 Route::middleware('auth')->group(function () {
